@@ -7,7 +7,7 @@ function App() {
   const [session, setSession] = useState(null);
   const [expenses, setExpenses] = useState([]);
 
-  // Check user session on load
+  // Get session on initial load
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -19,16 +19,14 @@ function App() {
       setSession(session);
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch expenses when logged in
+  // Fetch expenses once user is logged in
   useEffect(() => {
-    async function fetchExpenses() {
-      if (!session) return;
+    if (!session) return;
 
+    async function fetchExpenses() {
       console.log("📦 Fetching from Supabase...");
       const { data, error } = await supabase.from('expenses').select('*');
       if (error) {

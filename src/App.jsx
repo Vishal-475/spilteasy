@@ -1,42 +1,45 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './utils/supabaseClient';
 import AuthComponent from './components/auth';
+import ExpenseForm from './components/ExpenseForm';
 import './App.css';
 
 function App() {
   const [session, setSession] = useState(null);
   const [expenses, setExpenses] = useState([]);
 
-  // Get session on initial load
+  // Get session on load
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch expenses once user is logged in
-  useEffect(() => {
-    if (!session) return;
+  // Fetch expenses for the logged-in user
+  const fetchExpenses = async () => {
+    if (!session?.user) return;
 
-    async function fetchExpenses() {
-      console.log("📦 Fetching from Supabase...");
-      const { data, error } = await supabase.from('expenses').select('*');
-      if (error) {
-        console.error("❌ Supabase error:", error.message);
-      } else {
-        console.log("✅ Data fetched:", data);
-        setExpenses(data);
-      }
+    console.log("📦 Fetching expenses for:", session.user.id);
+    const { data, error } = await supabase
+      .from('expenses')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("❌ Error fetching expenses:", error.message);
+    } else {
+      setExpenses(data);
     }
+  };
 
+  useEffect(() => {
     fetchExpenses();
   }, [session]);
 
@@ -54,6 +57,8 @@ function App() {
       <button onClick={handleLogout} style={{ marginBottom: '20px' }}>
         Logout
       </button>
+
+      <ExpenseForm onExpenseAdded={fetchExpenses} session={session} />
 
       <h2>Expense List</h2>
       <ul>

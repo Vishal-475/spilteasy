@@ -49,6 +49,35 @@ function App() {
     setExpenses([]);
   };
 
+  const handleDeleteExpense = async (id) => {
+    const { error } = await supabase.from('expenses').delete().eq('id', id);
+    if (error) {
+      alert("❌ Failed to delete expense: " + error.message);
+    } else {
+      fetchExpenses();
+    }
+  };
+
+  const handleEditExpense = async (expense) => {
+    const newTitle = prompt("Edit title", expense.title);
+    const newAmount = prompt("Edit amount", expense.amount);
+    const newPaidBy = prompt("Edit paid by", expense.paid_by);
+
+    if (!newTitle || !newAmount || !newPaidBy) return;
+
+    const { error } = await supabase.from('expenses').update({
+      title: newTitle,
+      amount: parseFloat(newAmount),
+      paid_by: newPaidBy,
+    }).eq('id', expense.id);
+
+    if (error) {
+      alert("❌ Failed to update: " + error.message);
+    } else {
+      fetchExpenses();
+    }
+  };
+
   if (!session) return <AuthComponent />;
 
   return (
@@ -64,14 +93,17 @@ function App() {
       <ul>
         {expenses.map((expense) => (
           <li key={expense.id}>
-<strong>{expense.title}</strong> - ₹{expense.amount} <br />
-<span>👤 Paid by: {expense.paid_by}</span> <br />
-<span>🕒 Added on: {new Date(expense.created_at).toLocaleString()}</span>
+            <strong>{expense.title}</strong> - ₹{expense.amount} <br />
+            <span>👤 Paid by: {expense.paid_by}</span> <br />
+            <span>🕒 Added on: {new Date(expense.created_at).toLocaleString()}</span> <br />
+
+            <button onClick={() => handleEditExpense(expense)} style={{ marginRight: '10px' }}>✏️ Edit</button>
+            <button onClick={() => handleDeleteExpense(expense.id)}>🗑️ Delete</button>
           </li>
         ))}
       </ul>
     </div>
-  ) ;
+  );
 }
 
 export default App;

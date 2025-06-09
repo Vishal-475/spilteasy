@@ -64,7 +64,9 @@ function App() {
       <ul>
         {expenses.map((expense) => (
           <li key={expense.id}>
-            <strong>{expense.title}</strong> - ₹{expense.amount} (Paid by: {expense.paid_by})
+<strong>{expense.title}</strong> - ₹{expense.amount} <br />
+<span>👤 Paid by: {expense.paid_by}</span> <br />
+<span>🕒 Added on: {new Date(expense.created_at).toLocaleString()}</span>
           </li>
         ))}
       </ul>

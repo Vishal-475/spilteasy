@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from './utils/supabaseClient';
 import AuthComponent from './components/auth';
 import ExpenseForm from './components/ExpenseForm';
+import BalanceSummary from './components/BalanceSummary';
+
 import './App.css';
 
 function App() {
@@ -102,6 +104,10 @@ function App() {
           </li>
         ))}
       </ul>
+      <div style={{ marginTop: '40px', borderTop: '1px solid #ccc', paddingTop: '20px' }}>
+          <BalanceSummary expenses={expenses} />  
+      </div>
+
     </div>
   );
 }

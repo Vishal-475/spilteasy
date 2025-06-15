@@ -4,6 +4,7 @@ import AuthComponent from './components/auth';
 import ExpenseForm from './components/ExpenseForm';
 import BalanceSummary from './components/BalanceSummary';
 import './index.css';
+import './app.css'; // include Tailwind
 
 function App() {
   const [session, setSession] = useState(null);
@@ -11,8 +12,9 @@ function App() {
 
   // Get session on load
   useEffect(() => {
-    supabase.auth.getSession()
-      .then(({ data: { session } }) => setSession(session));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
@@ -21,7 +23,7 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch expenses
+  // Fetch expenses for this user
   const fetchExpenses = async () => {
     if (!session?.user) return;
     const { data, error } = await supabase
@@ -49,8 +51,27 @@ function App() {
 
   const handleDeleteExpense = async (id) => {
     const { error } = await supabase.from('expenses').delete().eq('id', id);
-    if (error) alert('❌ Error deleting expense: ' + error.message);
-    else fetchExpenses();
+    if (error) {
+      alert('❌ Error deleting expense: ' + error.message);
+    } else {
+      fetchExpenses();
+    }
+  };
+
+  const handleClearAllExpenses = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete ALL your expenses?");
+    if (!confirmDelete) return;
+
+    const { error } = await supabase
+      .from('expenses')
+      .delete()
+      .eq('user_id', session.user.id);
+
+    if (error) {
+      alert("❌ Error clearing all expenses: " + error.message);
+    } else {
+      fetchExpenses();
+    }
   };
 
   const handleEditExpense = async (expense) => {
@@ -65,8 +86,11 @@ function App() {
       paid_by: newPaidBy
     }).eq('id', expense.id);
 
-    if (error) alert('❌ Error updating: ' + error.message);
-    else fetchExpenses();
+    if (error) {
+      alert('❌ Error updating: ' + error.message);
+    } else {
+      fetchExpenses();
+    }
   };
 
   if (!session) return <AuthComponent />;
@@ -87,6 +111,7 @@ function App() {
         <ExpenseForm onExpenseAdded={fetchExpenses} session={session} />
 
         <h2 className="text-2xl font-semibold mt-6 mb-4">Expense List</h2>
+
         <ul className="space-y-4">
           {expenses.map(expense => (
             <li key={expense.id} className="bg-gray-50 p-4 rounded shadow">
@@ -119,6 +144,17 @@ function App() {
 
         <div className="mt-10 border-t pt-6">
           <BalanceSummary expenses={expenses} />
+
+          {expenses.length > 0 && (
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleClearAllExpenses}
+                className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+              >
+                🧹 Clear All Expenses
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

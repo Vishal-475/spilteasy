@@ -1,25 +1,25 @@
 import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
-export default function ExpenseForm({ onExpenseAdded, session }) {
+function ExpenseForm({ onExpenseAdded, session }) {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [paidBy, setPaidBy] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !amount || !paidBy) {
-      alert('Please fill all fields.');
-      return;
-    }
+    if (!title || !amount || !paidBy) return alert('❌ Please fill all fields');
+
     const { error } = await supabase.from('expenses').insert([{
       title,
       amount: parseFloat(amount),
       paid_by: paidBy,
-      user_id: session.user.id
+      user_id: session.user.id,
     }]);
-    if (error) console.error('Error adding expense:', error.message);
-    else {
+
+    if (error) {
+      alert('❌ Error: ' + error.message);
+    } else {
       setTitle('');
       setAmount('');
       setPaidBy('');
@@ -28,32 +28,54 @@ export default function ExpenseForm({ onExpenseAdded, session }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow mb-6 space-y-4">
-      <h2 className="text-xl font-semibold">Add New Expense</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <input
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          placeholder="Title"
-          className="p-2 border rounded"
-        />
-        <input
-          type="number"
-          value={amount}
-          onChange={e => setAmount(e.target.value)}
-          placeholder="Amount"
-          className="p-2 border rounded"
-        />
-        <input
-          value={paidBy}
-          onChange={e => setPaidBy(e.target.value)}
-          placeholder="Paid by"
-          className="p-2 border rounded col-span-1 sm:col-span-2"
-        />
+    <form onSubmit={handleSubmit} className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl shadow-md space-y-4">
+      <h2 className="text-xl font-semibold text-gray-700 mb-4">➕ Add New Expense</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">Title</label>
+          <input
+            type="text"
+            placeholder="e.g. Dinner"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">Amount (₹)</label>
+          <input
+            type="number"
+            placeholder="e.g. 500"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">Paid By</label>
+          <input
+            type="text"
+            placeholder="e.g. Vishal"
+            value={paidBy}
+            onChange={(e) => setPaidBy(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
       </div>
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-        Add Expense
-      </button>
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md transition"
+        >
+          ➕ Add Expense
+        </button>
+      </div>
     </form>
   );
 }
+
+export default ExpenseForm;

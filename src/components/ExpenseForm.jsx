@@ -1,25 +1,26 @@
 import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
-function ExpenseForm({ onExpenseAdded, session }) {
+export default function ExpenseForm({ onExpenseAdded, session }) {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [paidBy, setPaidBy] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !amount || !paidBy) return alert('❌ Please fill all fields');
+    if (!title || !amount || !paidBy) return alert('Please fill all fields');
 
-    const { error } = await supabase.from('expenses').insert([{
-      title,
-      amount: parseFloat(amount),
-      paid_by: paidBy,
-      user_id: session.user.id,
-    }]);
+    const { error } = await supabase.from('expenses').insert([
+      {
+        title,
+        amount: parseFloat(amount),
+        paid_by: paidBy,
+        user_id: session.user.id,
+      },
+    ]);
 
-    if (error) {
-      alert('❌ Error: ' + error.message);
-    } else {
+    if (error) alert('❌ Error: ' + error.message);
+    else {
       setTitle('');
       setAmount('');
       setPaidBy('');
@@ -28,48 +29,58 @@ function ExpenseForm({ onExpenseAdded, session }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl shadow-md space-y-4">
-      <h2 className="text-xl font-semibold text-gray-700 mb-4">➕ Add New Expense</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="w-full max-w-xl mx-auto mt-10 px-8 py-6 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl"
+    >
+      <h2 className="text-3xl font-extrabold text-white mb-6 text-center flex items-center justify-center gap-2">
+        <span>💸</span> Add New Expense
+      </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Title</label>
+      {/* Input Group */}
+      <div className="space-y-5">
+        {/* Title */}
+        <div className="relative">
+          <span className="absolute left-4 top-3 text-lg">📝</span>
           <input
             type="text"
-            placeholder="e.g. Dinner"
+            placeholder="Enter expense title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Amount (₹)</label>
+        {/* Amount */}
+        <div className="relative">
+          <span className="absolute left-4 top-3 text-lg">💰</span>
           <input
             type="number"
-            placeholder="e.g. 500"
+            placeholder="Enter amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Paid By</label>
+        {/* Paid By */}
+        <div className="relative">
+          <span className="absolute left-4 top-3 text-lg">🙋</span>
           <input
             type="text"
-            placeholder="e.g. Vishal"
+            placeholder="Who paid?"
             value={paidBy}
             onChange={(e) => setPaidBy(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
           />
         </div>
       </div>
 
-      <div className="flex justify-end">
+      {/* Submit Button */}
+      <div className="mt-6 text-center">
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md transition"
+          className="w-full py-3 bg-gradient-to-r from-green-400 to-lime-500 hover:from-green-500 hover:to-lime-600 text-white font-semibold rounded-lg transition-all shadow-lg"
         >
           ➕ Add Expense
         </button>
@@ -77,5 +88,3 @@ function ExpenseForm({ onExpenseAdded, session }) {
     </form>
   );
 }
-
-export default ExpenseForm;
